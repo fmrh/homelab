@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  flame:
+    image: pawelmalak/flame:latest
+    container_name: flame
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    volumes:
+      - /home/fmrh/flame/data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock # optional but required for Docker integration feature
+    environment:
+      - PASSWORD=INSERT_PASSWORD
+    labels:
+      - "traefik.enable=true"
+
+      - "traefik.http.routers.flame-secure.entrypoints=https"
+      - "traefik.http.routers.flame-secure.rule=Host(`dash.mydomain.com`)"
+      - "traefik.http.routers.flame-secure.tls=true"
+      - "traefik.http.routers.flame-secure.service=flame"
+      - "traefik.http.services.flame.loadbalancer.server.port=5005"
+      - "traefik.docker.network=proxy"
+
+networks:
+  proxy:
+    external: true

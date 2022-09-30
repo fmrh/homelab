@@ -1,0 +1,29 @@
+version: "2.1"
+
+services:
+  freshrss:
+    image: lscr.io/linuxserver/freshrss:latest
+    container_name: freshrss
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Dublin
+    volumes:
+      - /home/fmrh/freshrss/config:/config
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.freshrss-secure.entrypoints=https"
+      - "traefik.http.routers.freshrss-secure.rule=Host(`rss.mydomain.com`)"
+      - "traefik.http.routers.freshrss-secure.tls=true"
+      - "traefik.http.routers.freshrss-secure.service=freshrss"
+      - "traefik.http.services.freshrss.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy"
+
+networks:
+  proxy:
+    external: true
