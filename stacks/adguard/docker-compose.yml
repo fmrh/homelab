@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  adguardhome:
+    image: adguard/adguardhome
+    container_name: adguardhome
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - proxy
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - 784:784/udp
+      - 853:853/tcp
+      - 3000:3000/tcp
+      - 83:80/tcp
+    volumes:
+      - ./work:/opt/adguardhome/work
+      - ./conf:/opt/adguardhome/conf
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adguardhome-secure.entrypoints=https"
+      - "traefik.routers.adguardhome-secure.rule=Host(`dns.mydomain.com`)"
+      - "traefik.http.routers.adguardhome-secure.tls=true"
+      - "traefik.http.routers.adguardhome-secure.service=adguardhome"
+      - "traefik.http.services.adguardhome.loadbalancer.server.port=83"
+      - "traefik.docker.network=proxy"
+
+networks:
+  proxy:
+    external: true
